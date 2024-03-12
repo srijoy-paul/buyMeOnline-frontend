@@ -1,5 +1,5 @@
-import * as React from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -13,6 +13,8 @@ import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { Alert } from "@mui/material";
+import Cookies from "js-cookie";
 
 function Copyright(props) {
   return (
@@ -36,18 +38,57 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignIn() {
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [resMssg, setResMssg] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
+  // const [user, setUser] = useState({});
+
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+    console.log(email, password);
+
+    const signedInUser = {
+      email: email,
+      password: password,
+    };
+
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(signedInUser),
+    };
+    const response = await fetch(
+      "http://localhost:3000/api/v1/user/signin",
+      options
+    );
+    const responseData = await response.json();
+    console.log(responseData);
+    if (responseData.status === "err") {
+      setResMssg(responseData.message);
+      setIsSignedIn(false);
+      setShowAlert(true);
+    } else {
+      setIsSignedIn(true);
+      setTimeout(() => {
+        navigate("/products");
+      }, 3000);
+
+      setShowAlert(true);
+      // setUser(signedInUser);
+    }
+    const getcookie = Cookies.get("bt");
+    console.log(getcookie);
   };
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Grid container component="main" sx={{ height: "100vh" }}>
+      <Grid container component="main" sx={{ height: "90vh" }}>
         <CssBaseline />
         <Grid
           item
@@ -55,6 +96,7 @@ export default function SignIn() {
           sm={4}
           md={7}
           sx={{
+            // border: "2px solid blue",
             backgroundImage:
               "url(https://source.unsplash.com/random?wallpapers)",
             backgroundRepeat: "no-repeat",
@@ -67,6 +109,19 @@ export default function SignIn() {
           }}
         />
         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+          {showAlert
+            ? isSignedIn
+              ? (() => {
+                  return (
+                    <Alert severity="success">
+                      You have successfully Signined in to your account.
+                    </Alert>
+                  );
+                })()
+              : (() => {
+                  return <Alert severity="error">{resMssg}</Alert>;
+                })()
+            : ""}
           <Box
             sx={{
               my: 8,
@@ -74,6 +129,7 @@ export default function SignIn() {
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
+              // border: "2px solid green",
             }}
           >
             <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>

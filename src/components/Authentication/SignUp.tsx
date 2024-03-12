@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -9,10 +9,13 @@ import Checkbox from "@mui/material/Checkbox";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import CancelOutlinedIcon from "@mui/icons-material/CancelOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
+import { Alert } from "@mui/material";
 
 function Copyright(props) {
   return (
@@ -35,9 +38,20 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignUp() {
+  const [isSignedUp, setIsSignedUp] = useState(false);
+  const [resMssg, setResMssg] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
+
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    password: "",
+    isSeller: false,
+  });
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // console.log(e.target[0]);
+
     const name = e.target.elements.Name.value;
     const email = e.target.email.value;
     const password = e.target.password.value;
@@ -67,12 +81,40 @@ export default function SignUp() {
 
     const responseData = await response.json();
     console.log(responseData);
+    if (responseData.status === "ok") {
+      setShowAlert(true);
+      setIsSignedUp(true);
+      setUser(responseData.createdUser);
+    } else {
+      setIsSignedUp(false);
+      setShowAlert(true);
+      setResMssg(responseData.message);
+    }
   };
 
   return (
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
+        {showAlert
+          ? isSignedUp
+            ? (() => {
+                return (
+                  <Alert
+                    iconMapping={{
+                      success: <CheckCircleOutlineIcon fontSize="inherit" />,
+                    }}
+                  >
+                    Welcome {user.name} ! Signup Successfull. Please Signin to
+                    your account.
+                  </Alert>
+                );
+              })()
+            : (() => {
+                return <Alert severity="error">{resMssg}</Alert>;
+              })()
+          : ""}
+
         <Box
           sx={{
             marginTop: 8,
