@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -16,6 +16,7 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Link } from "react-router-dom";
 import { Alert } from "@mui/material";
+import showAuthenticationContext from "../../utils/contextUtils";
 
 function Copyright(props) {
   return (
@@ -38,6 +39,10 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignUp() {
+  // const { setShowAuthentication } = useContext(showAuthenticationContext);
+
+  // setShowAuthentication(false);
+
   const [isSignedUp, setIsSignedUp] = useState(false);
   const [resMssg, setResMssg] = useState("");
   const [showAlert, setShowAlert] = useState(false);
@@ -96,11 +101,20 @@ export default function SignUp() {
     <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
+
         {showAlert
           ? isSignedUp
             ? (() => {
                 return (
                   <Alert
+                    sx={{
+                      position: "absolute",
+                      top: "15%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 1000,
+                    }}
+                    severity={"success"}
                     iconMapping={{
                       success: <CheckCircleOutlineIcon fontSize="inherit" />,
                     }}
@@ -111,7 +125,20 @@ export default function SignUp() {
                 );
               })()
             : (() => {
-                return <Alert severity="error">{resMssg}</Alert>;
+                return (
+                  <Alert
+                    sx={{
+                      position: "absolute",
+                      top: "15%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 1000,
+                    }}
+                    severity="error"
+                  >
+                    {resMssg}
+                  </Alert>
+                );
               })()
           : ""}
 

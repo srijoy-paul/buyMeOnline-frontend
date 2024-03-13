@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -15,6 +15,7 @@ import Typography from "@mui/material/Typography";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Alert } from "@mui/material";
 import Cookies from "js-cookie";
+import showAuthenticationContext from "../../utils/contextUtils";
 
 function Copyright(props) {
   return (
@@ -38,6 +39,11 @@ function Copyright(props) {
 const defaultTheme = createTheme();
 
 export default function SignIn() {
+  // const { setShowAuthentication } = useContext(showAuthenticationContext);
+
+  // useEffect(() => {
+  //   setShowAuthentication(false);
+  // });
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [resMssg, setResMssg] = useState("");
   const [showAlert, setShowAlert] = useState(false);
@@ -78,12 +84,20 @@ export default function SignIn() {
       setTimeout(() => {
         navigate("/products");
       }, 3000);
+      console.log(responseData.bearer);
+      // localStorage.setItem("BearerToken", responseData.bearer);
+      Cookies.set("BearerToken", responseData.bearer, {
+        expires: new Date(Date.now() + 3600000),
+        // domain: "localhost",
+
+        // path: "/"
+      });
 
       setShowAlert(true);
       // setUser(signedInUser);
     }
-    const getcookie = Cookies.get("bt");
-    console.log(getcookie);
+    // const getcookie = Cookies.get("bt");
+    // console.log(getcookie);
   };
 
   return (
@@ -113,13 +127,35 @@ export default function SignIn() {
             ? isSignedIn
               ? (() => {
                   return (
-                    <Alert severity="success">
+                    <Alert
+                      sx={{
+                        position: "absolute",
+                        top: "15%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        zIndex: 1000,
+                      }}
+                      severity="success"
+                    >
                       You have successfully Signined in to your account.
                     </Alert>
                   );
                 })()
               : (() => {
-                  return <Alert severity="error">{resMssg}</Alert>;
+                  return (
+                    <Alert
+                      sx={{
+                        position: "absolute",
+                        top: "15%",
+                        left: "50%",
+                        transform: "translate(-50%, -50%)",
+                        zIndex: 1000,
+                      }}
+                      severity="error"
+                    >
+                      {resMssg}
+                    </Alert>
+                  );
                 })()
             : ""}
           <Box
